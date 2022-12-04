@@ -1,28 +1,32 @@
 import express from "express";
 import * as http from "node:http";
-import {Server} from "socket.io"
+import {Server as SocketServer} from "socket.io"
 import cors from "cors"
+import morgan from "morgan"
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
 
-const corsOption = {
+const corsConfig = {
     origin: "http://localhost:3000"
 }
 
 const app = express();
-app.use(cors(corsOption))
 const server = http.createServer(app)
-const io = new Server(server,{
-    cors:corsOption
+const io = new SocketServer(server,{
+    cors:corsConfig
 })
-const port = process.env.PORT || 3001
+
+app.use(morgan("dev"))
+app.use(cors())
+
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log(`user ${socket.id} connected`)
 });
 
+const port = process.env.PORT || 3001
 server.listen(port, () => {
     console.log(`listening on *:${port}`);
 });
