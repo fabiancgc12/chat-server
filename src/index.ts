@@ -24,6 +24,15 @@ app.use(cors())
 
 io.on('connection', (socket) => {
     console.log(`user ${socket.id} connected`)
+
+    socket.on("disconnect",() => {
+        console.log(`user ${socket.id} has disconnected`)
+    })
+
+    socket.on("message",(msg) => {
+        console.log(msg)
+        socket.broadcast.emit("message",msg)
+    })
 });
 
 const port = process.env.PORT || 3001
