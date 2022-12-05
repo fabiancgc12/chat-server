@@ -3,6 +3,7 @@ import * as http from "node:http";
 import {Server as SocketServer} from "socket.io"
 import cors from "cors"
 import morgan from "morgan"
+import {MessageType} from "./utils/MessageType";
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -29,9 +30,12 @@ io.on('connection', (socket) => {
         console.log(`user ${socket.id} has disconnected`)
     })
 
-    socket.on("message",(msg) => {
+    socket.on("message",(msg:string) => {
         console.log(msg)
-        socket.broadcast.emit("message",msg)
+        socket.broadcast.emit("message", {
+            message:msg,
+            user:socket.id
+        })
     })
 });
 
