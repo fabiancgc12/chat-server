@@ -1,4 +1,5 @@
 export type MessageType = {
     message:string,
-    user:string
+    user:string,
+    timeStamp:number
 }

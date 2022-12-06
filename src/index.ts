@@ -34,7 +34,8 @@ io.on('connection', (socket) => {
         console.log(msg)
         socket.broadcast.emit("message", {
             message:msg,
-            user:socket.id
+            user:socket.id,
+            timeStamp:new Date().getTime()
         })
     })
 });
