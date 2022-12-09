@@ -27,10 +27,13 @@ app.use(bodyParser.json())
 
 app.post("/login",(req,res) => {
     const {username} = req.body
-    console.log(`${username} has logged in`)
-    res.send({
-        username
-    })
+    if (authUser(req.body))
+        res.send({
+            username
+        })
+    else {
+        res.send(400)
+    }
 })
 
 const users:Map<string,string> = new Map([])
