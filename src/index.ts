@@ -27,18 +27,19 @@ app.use(bodyParser.json())
 
 app.post("/login",(req,res) => {
     const {username} = req.body
-    console.log(username)
+    console.log(`${username} has logged in`)
     res.send({
         username
     })
-    // users.set(newUser)
 })
 
 const users:Map<string,string> = new Map([])
 
 io.on('connection', (socket) => {
     console.log(`user ${socket.id} connected`)
-
+    const {username} = socket.handshake.auth
+    users.set(socket.id,username)
+    console.log(socket.handshake.auth)
     socket.on("disconnect",() => {
         console.log(`user ${socket.id} has disconnected`)
         users.delete(socket.id)
