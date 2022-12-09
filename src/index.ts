@@ -49,7 +49,6 @@ const authUser = (auth: { [x: string]: any; username?: string; }) => {
 
 io.use((socket, next) => {
     const auth = socket.handshake.auth;
-    console.log(auth);
     if (authUser(auth)) {
         return next();
     }
@@ -63,10 +62,11 @@ io.on('connection', (socket) => {
     const {username} = socket.handshake.auth
     users.set(socket.id,username)
     socket.on("disconnect",() => {
-        console.log(`user ${socket.id} has disconnected`)
+        const user = users.get(socket.id)
+        console.log(`user ${socket.id}: ${user} has disconnected`)
         users.delete(socket.id)
         const usersList = [...users].map(([id,username]) => username)
-        socket.emit("userList", usersList)
+        io.emit("userList", usersList)
     })
 
     socket.on("message",(msg:string) => {
@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
 
     socket.on("newUser",() => {
         const usersList = [...users].map(([id,username]) => username)
-        socket.emit("userList", usersList)
+        io.emit("userList", usersList)
     })
 });
 
