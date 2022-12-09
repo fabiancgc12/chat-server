@@ -38,8 +38,7 @@ const users:Map<string,string> = new Map([])
 io.on('connection', (socket) => {
     console.log(`user ${socket.id} connected`)
     const {username} = socket.handshake.auth
-    users.set(socket.id,username)
-    console.log(socket.handshake.auth)
+    users.set(username,socket.id)
     socket.on("disconnect",() => {
         console.log(`user ${socket.id} has disconnected`)
         users.delete(socket.id)
@@ -49,6 +48,11 @@ io.on('connection', (socket) => {
         if (msg.trim().length == 0 ) return
         console.log(msg)
         socket.broadcast.emit("message", new MessageModel(msg,socket.id))
+    })
+
+    socket.on("newUser",() => {
+        const usersList = [...users].map(([username]) => username)
+        socket.emit("userList", usersList)
     })
 });
 
