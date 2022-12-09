@@ -65,6 +65,8 @@ io.on('connection', (socket) => {
     socket.on("disconnect",() => {
         console.log(`user ${socket.id} has disconnected`)
         users.delete(socket.id)
+        const usersList = [...users].map(([id,username]) => username)
+        socket.emit("userList", usersList)
     })
 
     socket.on("message",(msg:string) => {
