@@ -34,11 +34,31 @@ app.post("/login",(req,res) => {
 })
 
 const users:Map<string,string> = new Map([])
+const authUser = (auth: { [x: string]: any; username?: string; }) => {
+    const {username} = auth;
+    if ([...users].some(([id,user]) => user == username)) return false
+    if (username && username.length > 0) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+io.use((socket, next) => {
+    const auth = socket.handshake.auth;
+    console.log(auth);
+    if (authUser(auth)) {
+        return next();
+    }
+    return next(new Error('authentication error'));
+});
+
 
 io.on('connection', (socket) => {
     console.log(`user ${socket.id} connected`)
+    // @ts-ignore
     const {username} = socket.handshake.auth
-    users.set(username,socket.id)
+    users.set(socket.id,username)
     socket.on("disconnect",() => {
         console.log(`user ${socket.id} has disconnected`)
         users.delete(socket.id)
@@ -51,7 +71,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on("newUser",() => {
-        const usersList = [...users].map(([username]) => username)
+        const usersList = [...users].map(([id,username]) => username)
         socket.emit("userList", usersList)
     })
 });
