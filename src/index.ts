@@ -32,7 +32,9 @@ app.post("/login",(req,res) => {
             username
         })
     else {
-        res.send(400)
+        res.status(400).send({
+            message:"User already exist"
+        })
     }
 })
 
