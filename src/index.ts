@@ -67,6 +67,7 @@ io.on('connection', (socket) => {
         users.delete(socket.id)
         const usersList = [...users].map(([id,username]) => username)
         io.emit("userList", usersList)
+        socket.broadcast.emit("stopTyping",user)
     })
 
     socket.on("message",(msg:string) => {
