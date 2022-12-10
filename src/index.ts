@@ -76,6 +76,18 @@ io.on('connection', (socket) => {
         socket.broadcast.emit("message", new MessageModel(msg,user))
     })
 
+    socket.on("isTyping",() => {
+        const user = users.get(socket.id)
+        console.log(`${user} is typing`)
+        socket.broadcast.emit("isTyping", user)
+    })
+
+    socket.on("stopTyping",() => {
+        const user = users.get(socket.id)
+        console.log(`${user} stopped typing`)
+        socket.broadcast.emit("stopTyping", user)
+    })
+
     socket.on("newUser",() => {
         const usersList = [...users].map(([id,username]) => username)
         io.emit("userList", usersList)
