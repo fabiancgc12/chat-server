@@ -72,7 +72,8 @@ io.on('connection', (socket) => {
     socket.on("message",(msg:string) => {
         if (msg.trim().length == 0 ) return
         console.log(msg)
-        socket.broadcast.emit("message", new MessageModel(msg,socket.id))
+        const user = users.get(socket.id)
+        socket.broadcast.emit("message", new MessageModel(msg,user))
     })
 
     socket.on("newUser",() => {
