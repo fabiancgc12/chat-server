@@ -7,6 +7,7 @@ import {LoginModel} from "./common/models/loginModel";
 import {validate} from "class-validator";
 import {BaseError} from "./common/errors/BaseError";
 import { CustomRequest } from "./common/Request/CustomRequest";
+import {ClassValidatorError} from "./common/errors/ClassValidatorError";
 
 const app = express();
 
@@ -19,7 +20,7 @@ app.post("/login",async (req:CustomRequest<LoginModel>,res,next) => {
     login.username = req.body.username
     const errors = await validate(login);
     if (errors.length) {
-        next(new BaseError(400,errors[0].constraints))
+        next(new ClassValidatorError(errors[0].constraints))
     }
     const {username} = req.body
     if (authUser(req.body))
@@ -33,9 +34,9 @@ app.post("/login",async (req:CustomRequest<LoginModel>,res,next) => {
 
 //handling errors
 app.use((err,req,res,next) => {
-    console.error('Error middleware :', err);
+    console.error('Error found');
     if (err instanceof BaseError) {
-        console.log('Error is known.');
+        console.log(`Error known, is: ${err}`);
         res.status(err.status).json(err);
     } else {
         console.log("Unknown Error")

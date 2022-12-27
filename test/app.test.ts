@@ -22,8 +22,9 @@ describe('app', function () {
             .post("/login")
             .expect(400)
             .expect(res => {
-                expect(res.body.error.isNotEmpty).toBe('username should not be empty')
-                expect(res.body.error.isString).toBe('username must be a string')
+                expect(res.body.error).toBeInstanceOf(Array)
+                expect(res.body.error).toContain('username should not be empty')
+                expect(res.body.error).toContain('username must be a string')
             })
     });
 
@@ -35,7 +36,8 @@ describe('app', function () {
                 username:5
             })
             .expect(res => {
-                expect(res.body.error.isString).toBe('username must be a string')
+                expect(res.body.error).toBeInstanceOf(Array)
+                expect(res.body.error).toContain('username must be a string')
             })
     });
 
