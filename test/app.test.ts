@@ -21,11 +21,9 @@ describe('app', function () {
         await request(app)
             .post("/login")
             .expect(400)
-            .expect({
-                message:{
-                    isNotEmpty:'username should not be empty',
-                    isString: 'username must be a string'
-                }
+            .expect(res => {
+                expect(res.body.error.isNotEmpty).toBe('username should not be empty')
+                expect(res.body.error.isString).toBe('username must be a string')
             })
     });
 
@@ -36,10 +34,8 @@ describe('app', function () {
             .send({
                 username:5
             })
-            .expect({
-                message:{
-                    isString: 'username must be a string'
-                }
+            .expect(res => {
+                expect(res.body.error.isString).toBe('username must be a string')
             })
     });
 
