@@ -17,9 +17,10 @@ app.post("/login",(req,res) => {
             username
         })
     else {
-        res.status(400).send({
+        res.status(400).json({
             message:"User already exist"
         })
+
     }
 })
 
