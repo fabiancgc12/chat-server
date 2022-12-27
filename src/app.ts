@@ -10,9 +10,12 @@ import { CustomRequest } from "./common/Request/CustomRequest";
 import {ClassValidatorError} from "./common/errors/ClassValidatorError";
 
 const app = express();
+export const corsConfig = {
+    origin: "http://localhost:3000"
+}
 
 app.use(morgan("dev"))
-app.use(cors())
+app.use(cors(corsConfig))
 app.use(bodyParser.json())
 
 app.post("/login",async (req:CustomRequest<LoginModel>,res,next) => {
