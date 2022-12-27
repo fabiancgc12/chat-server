@@ -1,11 +1,9 @@
-import express from "express";
 import * as http from "node:http";
 import {Server as SocketServer} from "socket.io"
-import cors from "cors"
-import morgan from "morgan"
-import bodyParser from "body-parser"
-import {MessageModel} from "./utils/MessageModel";
-import {LoginModel} from "./utils/loginModel";
+import {MessageModel} from "./common/models/MessageModel";
+import { authUser, users } from "./common/utils/authUser";
+import app from "./app"
+
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -15,39 +13,10 @@ const corsConfig = {
     origin: "http://localhost:3000"
 }
 
-const app = express();
 const server = http.createServer(app)
 const io = new SocketServer(server,{
     cors:corsConfig
 })
-
-app.use(morgan("dev"))
-app.use(cors())
-app.use(bodyParser.json())
-
-app.post("/login",(req,res) => {
-    const {username} = req.body
-    if (authUser(req.body))
-        res.send({
-            username
-        })
-    else {
-        res.status(400).send({
-            message:"User already exist"
-        })
-    }
-})
-
-const users:Map<string,string> = new Map([])
-const authUser = (auth: { [x: string]: any; username?: string; }) => {
-    const {username} = auth;
-    if ([...users].some(([id,user]) => user == username)) return false
-    if (username && username.length > 0) {
-        return true;
-    } else {
-        return false;
-    }
-};
 
 io.use((socket, next) => {
     const auth = socket.handshake.auth;
