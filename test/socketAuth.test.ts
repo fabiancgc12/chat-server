@@ -1,8 +1,3 @@
-// import server,{io} from "../src/socketServer";
-// import {IncomingMessage, Server, ServerResponse} from "http";
-// const Client = require("socket.io-client");
-// const { Server } = require("socket.io");
-
 import * as http from "http";
 import app from "../src/app";
 import {setIoServer} from "../src/socketServer";
@@ -11,7 +6,8 @@ const ioBack = require('socket.io');
 
 describe('socket when clients connect wi', () => {
 
-    let socket;
+    let socketFirstUser;
+    let socketSecondUser;
     let httpServer;
     let httpServerAddr;
     let ioServer;
@@ -43,14 +39,20 @@ describe('socket when clients connect wi', () => {
         // Setup
         // Do not hardcode server port and address, square brackets are used for IPv6
         console.log(`http://[${httpServerAddr.address}]:${httpServerAddr.port}`)
-        socket = ioClient(`http://[${httpServerAddr.address}]:${httpServerAddr.port}`, {
+        socketFirstUser = ioClient(`http://[${httpServerAddr.address}]:${httpServerAddr.port}`, {
             'reconnection delay': 0,
             'reopen delay': 0,
             autoConnect:false,
             'force new connection': true,
             transports: ['websocket'],
         });
-
+        socketSecondUser = ioClient(`http://[${httpServerAddr.address}]:${httpServerAddr.port}`, {
+            'reconnection delay': 0,
+            'reopen delay': 0,
+            autoConnect:false,
+            'force new connection': true,
+            transports: ['websocket'],
+        });
         done();
     });
 
@@ -59,25 +61,62 @@ describe('socket when clients connect wi', () => {
      */
     afterEach((done) => {
         // Cleanup
-        if (socket.connected) {
-            socket.disconnect();
+        if (socketFirstUser.connected) {
+            socketFirstUser.disconnect();
+        }
+        if (socketSecondUser.connected) {
+            socketSecondUser.disconnect();
         }
         done();
     });
 
-    it('should communicate with waiting for socket.io handshakes', (done) => {
+    it('should connect one user', (done) => {
         const username = "John"
-        socket.auth = {username}
-        socket.connect()
-        socket.on('connect', () => {
+        socketFirstUser.auth = {username}
+        socketFirstUser.connect()
+        socketFirstUser.on('connect', () => {
             //requesting users
-            socket.emit("newUser")
+            socketFirstUser.emit("newUser")
         });
-        socket.emit('example', 'some messages');
-        socket.on("userList",(users) => {
+        socketFirstUser.emit('example', 'some messages');
+        socketFirstUser.on("userList",(users) => {
             expect(users).toBeInstanceOf(Array)
             expect(users).toContain(username)
             done()
         })
+    });
+
+    it('should connect two users', (done) => {
+        const firstUsername = "John"
+        socketFirstUser.auth = {username:firstUsername}
+        // 1. we connect the first user
+        socketFirstUser.connect()
+        socketFirstUser.on('connect', () => {
+            //requesting users
+            socketFirstUser.emit("newUser")
+        });
+
+        //2. when first user is connect we connect the second
+        const secondUsername = "Doe"
+        socketSecondUser.auth = {username:secondUsername}
+        socketSecondUser.on('connect', () => {
+            //requesting users
+            socketSecondUser.emit("newUser")
+        });
+        socketFirstUser.on("userList",(users) => {
+            expect(users).toBeInstanceOf(Array)
+            expect(users).toContain(firstUsername);
+            expect(users).not.toContain(secondUsername);
+            socketSecondUser.connect()
+            done()
+        })
+
+        socketSecondUser.on("userList",(users) => {
+            expect(users).toBeInstanceOf(Array)
+            expect(users).toContain(firstUsername);
+            expect(users).toContain(secondUsername);
+            done()
+        })
     },10000);
+
 });
