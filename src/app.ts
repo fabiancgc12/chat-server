@@ -8,6 +8,7 @@ import {validate} from "class-validator";
 import {BaseError} from "./common/errors/BaseError";
 import { CustomRequest } from "./common/Request/CustomRequest";
 import {ClassValidatorError} from "./common/errors/ClassValidatorError";
+import {AuthError} from "./common/errors/AuthError";
 
 const app = express();
 export const corsConfig = {
@@ -31,7 +32,7 @@ app.post("/login",async (req:CustomRequest<LoginModel>,res,next) => {
             username
         })
     else {
-        next(new BaseError(400,"User already exist"))
+        next(new AuthError())
     }
 })
 
