@@ -96,7 +96,7 @@ describe('socket when clients connect wi', () => {
             socketFirstUser.emit("newUser")
         });
 
-        //2. when first user is connect we connect the second
+        //2. when first user is connected we connect the second
         const secondUsername = "Doe"
         socketSecondUser.auth = {username:secondUsername}
         socketSecondUser.on('connect', () => {
