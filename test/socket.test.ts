@@ -1,6 +1,7 @@
 import * as http from "http";
 import app from "../src/app";
 import {setIoServer} from "../src/socketServer";
+import {MessageModel} from "../src/common/models/MessageModel";
 const ioClient = require('socket.io-client');
 const ioBack = require('socket.io');
 
@@ -10,12 +11,21 @@ function connectClient(socket,username){
 }
 
 describe('Testing chat Socket', () => {
-
+    const firstUsername = "John"
+    const secondUsername = "Doe"
     let firstUserSocket;
     let secondUserSocket;
     let httpServer;
     let httpServerAddr;
     let ioServer;
+
+    function connectFirstClient(){
+        connectClient(firstUserSocket,firstUsername)
+    }
+
+    function connectSecondClient(){
+        connectClient(secondUserSocket,secondUsername)
+    }
 
     /**
      * Setup WS & HTTP servers
@@ -125,8 +135,6 @@ describe('Testing chat Socket', () => {
     },10000);
 
     it('should Should connect three users and then disconnect the first', function (done) {
-        const firstUsername = "John"
-        const secondUsername = "Doe"
         const thirdUsername = "Maria"
         const thirdClientSocket = ioClient(`http://[${httpServerAddr.address}]:${httpServerAddr.port}`, {
             'reconnection delay': 0,
@@ -135,19 +143,14 @@ describe('Testing chat Socket', () => {
             'force new connection': true,
             transports: ['websocket'],
         });
-        connectClient(firstUserSocket,firstUsername)
+        connectFirstClient()
         firstUserSocket.on('connect', () => {
-            //requesting users
-            connectClient(secondUserSocket,"Doe")
-            firstUserSocket.emit("newUser")
-
-        });
-        firstUserSocket.on('connect', () => {
-            //requesting users
-            secondUserSocket.emit("newUser")
+            connectSecondClient()
             connectClient(thirdClientSocket,thirdUsername)
-            firstUserSocket.disconnect();
         });
+        thirdClientSocket.on("connect",() => {
+            firstUserSocket.disconnect();
+        })
         thirdClientSocket.on("userList",(users) => {
             expect(users).toContain(thirdUsername)
             expect(users).toContain(secondUsername)
@@ -156,4 +159,25 @@ describe('Testing chat Socket', () => {
         })
     });
 
+    it('should send messages between two users', function (done) {
+        const firstMessage = "lorem ipsum";
+        const secondMessage = "this is a test message";
+        connectFirstClient()
+        firstUserSocket.on('connect', () => {
+            connectSecondClient()
+        });
+        firstUserSocket.on('message', (data:MessageModel) => {
+            expect(data.message).toBe(firstMessage)
+            expect(data.user).toBe(secondUsername)
+            firstUserSocket.emit("message",secondMessage)
+        });
+        secondUserSocket.on('connect', () => {
+            secondUserSocket.emit("message",firstMessage)
+        });
+        secondUserSocket.on('message', (data:MessageModel) => {
+            expect(data.message).toBe(secondMessage)
+            expect(data.user).toBe(firstUsername)
+            done()
+        });
+    });
 });
