@@ -93,7 +93,6 @@ describe('Testing chat Socket', () => {
             //requesting users
             firstUserSocket.emit("newUser")
         });
-        firstUserSocket.emit('example', 'some messages');
         firstUserSocket.on("userList",(users) => {
             expect(users).toBeInstanceOf(Array)
             expect(users).toContain(username)
@@ -102,28 +101,23 @@ describe('Testing chat Socket', () => {
     });
 
     it('should connect two users', (done) => {
-        const firstUsername = "John"
-        firstUserSocket.auth = {username:firstUsername}
         // 1. we connect the first user
-        firstUserSocket.connect()
+        connectFirstClient()
         firstUserSocket.on('connect', () => {
             //requesting users
             firstUserSocket.emit("newUser")
         });
 
         //2. when first user is connected we connect the second
-        const secondUsername = "Doe"
-        secondUserSocket.auth = {username:secondUsername}
         secondUserSocket.on('connect', () => {
             //requesting users
             secondUserSocket.emit("newUser")
         });
-        firstUserSocket.on("userList",(users) => {
+        firstUserSocket.once("userList",(users) => {
             expect(users).toBeInstanceOf(Array)
             expect(users).toContain(firstUsername);
             expect(users).not.toContain(secondUsername);
-            secondUserSocket.connect()
-            done()
+            connectSecondClient()
         })
 
         secondUserSocket.on("userList",(users) => {
@@ -216,5 +210,6 @@ describe('Testing chat Socket', () => {
             done()
         });
     });
+
 
 });
