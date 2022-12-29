@@ -4,7 +4,7 @@ import {setIoServer} from "../src/socketServer";
 const ioClient = require('socket.io-client');
 const ioBack = require('socket.io');
 
-describe('socket when clients connect wi', () => {
+describe('Testing chat Socket', () => {
 
     let socketFirstUser;
     let socketSecondUser;
