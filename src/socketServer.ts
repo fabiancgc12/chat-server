@@ -16,8 +16,7 @@ export function setIoServer(ioServer: SocketServer){
         if (authUser(auth)) {
             return next();
         }
-        socket.emit("error",new AuthError())
-        return next(new AuthError());
+        next(new AuthError());
     });
 
     ioServer.on('connection', (socket) => {
