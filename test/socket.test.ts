@@ -149,6 +149,7 @@ describe('Testing chat Socket', () => {
             expect(users).toContain(thirdUsername)
             expect(users).toContain(secondUsername)
             expect(users).not.toContain(firstUsername)
+            thirdClientSocket.disconnect()
             done()
         })
     });
