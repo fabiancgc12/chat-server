@@ -41,7 +41,7 @@ app.use((err,req,res,next) => {
     console.error('Error found');
     if (err instanceof BaseError) {
         console.log(`Error known, is: ${err}`);
-        res.status(err.status).json(err);
+        res.status(err.data.status).json(err);
     } else {
         console.log("Unknown Error")
         // For unhandled errors.
