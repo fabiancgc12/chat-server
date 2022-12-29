@@ -180,4 +180,41 @@ describe('Testing chat Socket', () => {
             done()
         });
     });
+
+    it('should test isTyping event', function (done) {
+        connectFirstClient()
+        firstUserSocket.on('connect', () => {
+            connectSecondClient()
+        });
+        firstUserSocket.on('isTyping', (data:MessageModel) => {
+            expect(data).toBe(secondUsername)
+            firstUserSocket.emit("isTyping")
+        });
+        secondUserSocket.on('connect', () => {
+            secondUserSocket.emit("isTyping")
+        });
+        secondUserSocket.on('isTyping', (data) => {
+            expect(data).toBe(firstUsername)
+            done()
+        });
+    });
+
+    it('should test stopTyping event', function (done) {
+        connectFirstClient()
+        firstUserSocket.on('connect', () => {
+            connectSecondClient()
+        });
+        firstUserSocket.on('stopTyping', (data:MessageModel) => {
+            expect(data).toBe(secondUsername)
+            firstUserSocket.emit("stopTyping")
+        });
+        secondUserSocket.on('connect', () => {
+            secondUserSocket.emit("stopTyping")
+        });
+        secondUserSocket.on('stopTyping', (data) => {
+            expect(data).toBe(firstUsername)
+            done()
+        });
+    });
+
 });
