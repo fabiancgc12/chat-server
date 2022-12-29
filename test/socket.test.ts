@@ -212,7 +212,7 @@ describe('Testing chat Socket', () => {
         });
     });
 
-    it('should test disconnect event should send userlist', function (done) {
+    it('should test disconnect event should send userlist to client', function (done) {
         connectFirstClient()
         firstUserSocket.on('connect', () => {
             connectSecondClient()
@@ -223,6 +223,20 @@ describe('Testing chat Socket', () => {
         secondUserSocket.on('userList',(users) => {
             expect(users).toContain(secondUsername)
             expect(users).not.toContain(firstUsername)
+            done()
+        })
+    });
+
+    it('should test disconnect event should send stopTyping to client', function (done) {
+        connectFirstClient()
+        firstUserSocket.on('connect', () => {
+            connectSecondClient()
+        });
+        secondUserSocket.on('connect', () => {
+            firstUserSocket.disconnect()
+        });
+        secondUserSocket.on('stopTyping',(user) => {
+            expect(user).toContain(firstUsername)
             done()
         })
     });
