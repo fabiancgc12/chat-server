@@ -4,6 +4,9 @@ import {Server as SocketServer} from "socket.io";
 import {authUser, users} from "./common/utils/authUser";
 import {MessageModel} from "./common/models/MessageModel";
 import {AuthError} from "./common/errors/AuthError";
+import {CreateMessageDto} from "./common/models/createMessage.dto";
+import {validate} from "class-validator";
+import {ClassValidatorError} from "./common/errors/ClassValidatorError";
 
 const server = http.createServer(app)
 const ioServer = new SocketServer(server,{
@@ -33,8 +36,12 @@ export function setIoServer(ioServer: SocketServer){
             socket.broadcast.emit("stopTyping",user)
         })
 
-        socket.on("message",(msg:string) => {
-            if (msg.trim().length == 0 ) return
+        socket.on("message",async (msg:string) => {
+            const createMessage = new CreateMessageDto(msg)
+            const errors = await validate(createMessage);
+            if (errors.length) {
+                socket.emit("errorMessage",new ClassValidatorError(errors[0].constraints))
+            }
             console.log(msg)
             const user = users.get(socket.id)
             socket.broadcast.emit("message", new MessageModel(msg,user))

@@ -176,6 +176,24 @@ describe('Testing chat Socket', () => {
         });
     });
 
+    it('should throw error when message is empty', function (done) {
+        connectFirstClient()
+        let timesCalled = 0
+        firstUserSocket.on('connect', () => {
+            firstUserSocket.emit("message")
+        });
+
+        firstUserSocket.on("errorMessage",(err) => {
+            if (timesCalled < 2){
+                expect(err.data.status).toBe(400)
+                firstUserSocket.emit("message","")
+                timesCalled++
+            } else {
+                done()
+            }
+        })
+    });
+
     it('should test isTyping event', function (done) {
         connectFirstClient()
         firstUserSocket.on('connect', () => {
